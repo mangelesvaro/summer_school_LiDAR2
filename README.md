@@ -2,17 +2,17 @@
 
 [![DOI](https://zenodo.org/badge/694534100.svg)](https://zenodo.org/doi/10.5281/zenodo.10454197)
 
-# Capítulo 10: Sensores activos en ciencias forestales: LiDAR
+# LiDAR para inventario forestal con lidR
 
 En el presente ejercicio se va a aprender a realizar un inventario forestal con datos LiDAR.
 
-## 4. Extracción de métricas de parcela y modelización de variables de inventario
+## 1. Extracción de métricas de parcela
 
-Siguiendo el flujo de trabajo habitual de un inventario LiDAR trabajando a nivel de masa, tras la normalización de los pulsos, se llevaría a cabo la extracción de las métricas de las parcelas y su modelización con las variables de campo.
+Siguiendo el flujo de trabajo habitual de un inventario LiDAR trabajando a nivel de masa, partiendo de la normalización de los pulsos realizada en el workshop anterior, se llevaría a cabo la extracción de las métricas de las parcelas y su modelización con las variables de campo.
 
 Es importante que durante la fase de campo se hayan seleccionado las parcelas cubriendo toda la variabilidad de la masa. De esta manera el modelo que se genere, represente todo el rango de datos del monte.
 
-### 4.1. Introducir los datos necesarios
+### 1.1. Introducir los datos necesarios
 
 Se introducen los datos LiDAR normalizados en el ejercicio anterior. Para seleccionar sólo los que están normalizados y evitar los originales, se selecciona empleando el patrón del sufijo *norm* con los que lse guardaron.
 
@@ -24,7 +24,7 @@ catalogo_norm<-readLAScatalog(folder="E:/DESCARGA/",     #Adaptar a la ruta de d
                               pattern = "norm.las")
 ```
 
-Se necesita una muestra de parcelas de campo donde se realicen mediciones de las variables de masa que se quieran estimar y de donde tengamos información LiDAR. Se introducen, por tanto, los datos de las mediciones de las parcelas de campo, a través del excel [colgado en la plataforma](https://github.com/Libro-GEOFOREST/Capitulo13_LiDAR_y_Radar/tree/main/DatosTrabajodeCampo) y que se debe haber descargado previamente.
+Se necesita una muestra de parcelas de campo donde se realicen mediciones de las variables de masa que se quieran estimar y de donde tengamos información LiDAR. Se introducen, por tanto, los datos de las mediciones de las parcelas de campo, a través del excel [colgado en la plataforma](https://github.com/mangelesvaro/summer_school_LiDAR2/DatosTrabajodeCampo) y que se debe haber descargado previamente.
 
 ```r
 library(readxl)
@@ -95,7 +95,7 @@ mapa1+mapa2
 
 ![](https://github.com/Libro-GEOFOREST/Capitulo10_LiDAR_y_Radar/blob/main/Auxiliares/parcelas.png)
 
-### 4.2. Extracción de métricas LiDAR de las parcelas
+### 1.2. Extracción de métricas LiDAR de las parcelas
 
 Las métricas de una nube de puntos LiDAR consisten en una serie de estadísticas que describen y resumen la distribución de las alturas y/o intensidades de los puntos que a ella pertenecen. 
 
@@ -232,7 +232,7 @@ ID | Parcela | n | zmin | zmean | zmax | zsd | zskew | zkurt | zq25 | zq50 | zq6
 30 | 30 | 264 | -0.284 | 4.149523 | 10.040 | 3.861291 | -0.0408131 | 1.178377 | 0.00000 | 5.7985 | 6.8646 | 7.87925 | 8.0740 | 8.6989 | 54.92 | 54.92 | POINT (536950.8 4119754)
 31 | 31 | 920 | -0.186 | 3.186741 | 8.393 | 2.688232 | -0.1099419 | 1.308814 | 0.13675 | 4.2870 | 4.8738 | 5.55875 | 5.7694 | 6.2943 | 57.39 | 58.59 | POINT (536839.2 4119197)
 
-### 4.3. Modelización de las variables
+### 2. Modelización de las variables
 
 Un modelo lineal o regresión lineal se utiliza para predecir el resultado de una variable *y*, sobre la base de una o varias variables predictoras *x*. El objetivo consiste en construir una fórmula matemática que defina el comportamiento de la variable *y* en función de la variable *x*. 
 
@@ -247,7 +247,7 @@ En los inventarios LiDAR, la variable *y* será cualquiera de las variables daso
 parcelas<-merge(campo,metricas.parcelas)
 ```
 
-#### 4.3.1. Estudio de la variable respuesta área basimétrica G (m2/ha)
+#### 2.1. Estudio de la variable respuesta área basimétrica G (m2/ha)
 
 Primero se va a comprobar la distribución de la variable respuesta. El tipo de modelos que se están empleando necesitan que siga una distribución normal. Para comprobarlo, se va a visualizar el histograma de distribución que sigue la variable, un gráfico cualtil-cuantil o qqplot que compara la distribución de la variable con la distribución normal teórica y finalmente se ejecuta un test de normalidad con la prueba de Shapiro-Wilks.
 
@@ -523,9 +523,9 @@ legend("topleft",legend=c(paste0("r=",round(correlaciones,2)),
 
 Finalmente, se da por bueno el modelo generado. 
 
-## 5. Extracción de métricas de superficie y resultados de variables de inventario
+## 3. Extracción de métricas de superficie y resultados de variables de inventario
 
-### 5.1. Calculo del tamaño de pixel
+### 3.1. Calculo del tamaño de pixel
 
 Una de los puntos clave de la extrapolacion de los resultados del modelo a toda la superficie es la decision del tamaño de pixel del raster que va a representar la variable calculada. Generalmente, se establece que el tamaño de celda debe ser equivalente al de tamaño de la parcela medida en campo para que los parametros estadisticos sean coherentes.
 
@@ -547,7 +547,7 @@ tamano.lado.pixel
 
 El tamaño de celda sera, por tanto, de 19 m.
 
-### 5.3. Extraccion de las metricas de superficies
+### 3.2. Extraccion de las metricas de superficies
 
 Si para computar las metricas a nivel de parcela se empleaba la funcion *plot_metrics()*, para hacerlo a nivel de superficies se utiliza la funcion *grid_metrics()*, que calcula las estadisticas que se han definido en el ejercicio anterior para el conjunto de datos LiDAR dentro de cada pixel de un raster. En el parametro *res* se indica el tamaño de celda de 19 m.
 
@@ -596,9 +596,9 @@ plot(metricas.superf$zq50)
 
 ![](https://github.com/Libro-GEOFOREST/Capitulo10_LiDAR_y_Radar/blob/main/Auxiliares/zq50.png)
 
-### 5.4. Resultados de variables de inventario
+### 3.3. Resultados de variables de inventario
 
-#### 5.4.1. Con la funcion *predict()*
+#### 3.3.1. Con la funcion *predict()*
 
 La funcion *predict()* se utiliza para predecir resultados de un modelo sobre nuevos valores. En este ejemplo, los nuevos valores corresponden al raster de percentil 50 de toda la superficie de estudio.
 
@@ -630,7 +630,7 @@ mapview(G.predict,layer.name = "area basimetrica",
 
 ![](https://github.com/Libro-GEOFOREST/Capitulo10_LiDAR_y_Radar/blob/main/Auxiliares/G.png)
 
-#### 5.4.2. Aplicando la ecuacion de la regresion lineal
+#### 3.3.2. Aplicando la ecuacion de la regresion lineal
 
 El resultado del modelo lineal simple que se ha cread es una ecuacion lineal. Se pueden conocer cual es la estimacion del parametro $b_{0}$ y del $b_{1}$ llamando a los coeficientes del modelo
 
@@ -676,7 +676,7 @@ mapview(G.predict2,layer.name = "area basimetrica",
 
 ![](https://github.com/Libro-GEOFOREST/Capitulo10_LiDAR_y_Radar/blob/main/Auxiliares/G.png)
 
-### 5.5. Guardar resultados
+### 3.4. Guardar resultados
 
 Finalmente, se guardan los resultados para poder emplearlo en un programa de sistema de informacion geografica como ArcGIS o QGIS.
 
